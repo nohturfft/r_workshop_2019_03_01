@@ -204,6 +204,9 @@ vignette("magrittr")
 #     https://stackoverflow.com/documentation/r
 #     https://stackoverflow.com/documentation/r/topics
 
+# (8) To stay up-to-date on R consider subscribing to r-bloggers:
+#     * https://www.r-bloggers.com/
+#     * https://feeds.feedburner.com/RBloggers
 
 #-------------------------------------------------------------------------------
 # ********************************  EXERCISE!!  ********************************
