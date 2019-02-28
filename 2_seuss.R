@@ -41,7 +41,7 @@ installed.packages(lib.loc=lib.loc) %>% row.names()
 #-------------------------------------------------------------------------------
 # You can select a file programmatically [e.g. by copying from the console after
 # list.files() ]
-my.file <- "green_eggs_and_ham.txt"
+my.file <- "data/green_eggs_and_ham.txt"
 # Or you can choose a file interactively with file.choose() :
 my.file <- file.choose(new=FALSE)
 print(my.file)
