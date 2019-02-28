@@ -1,5 +1,5 @@
 #===============================================================================
-# PROGRAMMING WORKSHOP - DAY 2: R
+# PROGRAMMING WORKSHOP - PART 2: R
 #===============================================================================
 # LOADING DATA FROM FILES
 # ** reading lines of text
@@ -11,25 +11,51 @@
 #===============================================================================
 
 #-------------------------------------------------------------------------------
-# Set working directory
+# Check working directory
 #-------------------------------------------------------------------------------
-setwd("~/Dropbox/SGUL_Teaching/SGUL_Workshops/2017_Programming_Workshop")
+getwd()
+# "/homedirs26/sghms/bms/users/anohturf/_workshops/r_workshop_2019_03_01"
 
 #-------------------------------------------------------------------------------
-# Reading data from files: reading lines of text
-# ( not used much really)
+# Tell R where packages are stored:
+#-------------------------------------------------------------------------------
+lib.loc <- "/homedirs8/workshops/190301-R/packages_3_5_0"
+.libPaths(lib.loc)
+list.files(lib.loc)
+
+#-------------------------------------------------------------------------------
+# Load some packages:
+#-------------------------------------------------------------------------------
+library(magrittr, lib.loc=lib.loc)
+library(wordcloud2, lib.loc=lib.loc)
+
+#-------------------------------------------------------------------------------
+# Check what packages have been installed for this workshop:
+#-------------------------------------------------------------------------------
+installed.packages(lib.loc=lib.loc) %>% row.names()
+
+
+#-------------------------------------------------------------------------------
+# Reading data from files using 'readLines()': reading lines of text
+# (not used much in Bioinformatics really)
 #-------------------------------------------------------------------------------
 # You can select a file programmatically [e.g. by copying from the console after
 # list.files() ]
 my.file <- "green_eggs_and_ham.txt"
 # Or you can choose a file interactively with file.choose() :
 my.file <- file.choose(new=FALSE)
-txt <-readLines(con=my.file, n=10)
+print(my.file)
+
+txt <- readLines(con=my.file, n=10)
 txt
+
+# To print the text in the console with linefeeds (newlines) re-inserted,
+# use cat(); the 'sep' argument tells R to separate items with newline ("\n)
+# characters:
 cat(txt, sep="\n")
 
 #-------------------------------------------------------------------------------
-# Reading words into a vector:
+# Reading individual words into a vector (scan() command):
 #-------------------------------------------------------------------------------
 txt <- scan(file="green_eggs_and_ham.txt", what=character())
 txt
@@ -42,12 +68,14 @@ sort(txt)
 length(unique(txt)) # 73
 
 # Unix/Linux-like pipes have become more popular -
-# the '%>%' command sends the result of one command on to the next
-if (!require(magrittr)) install.packages("magrittr"); library(magrittr)
+# the '%>%' command from the magrittr package sends the result of one command
+# on to the next
 txt %>% unique
 txt %>% unique %>% sort
 txt %>% toupper %>% unique %>% sort
 txt %>% toupper %>% unique %>% length # 53
+
+# The results of a pipe can of course be stored in a variable:
 txt.up <- txt %>% toupper
 print(txt.up)
 txt.lo <- txt %>% tolower
@@ -56,41 +84,56 @@ print(txt.lo)
 #-------------------------------------------------------------------------------
 # Saving a text vector in a file:
 #-------------------------------------------------------------------------------
+# First check that you are in the right working directory:
+getwd()
+# (use setwd() or the Session menu to change the working directory)
 cat(txt, sep="\n", file="newfile.txt")
+
+# Check whether the file has really been created:
+list.files()
 
 #-------------------------------------------------------------------------------
 # Counting elements in a vector:
 #-------------------------------------------------------------------------------
-# The 'table' function counts how often each element occurs in a vector (a list):
+# The 'table' function counts how often each element occurs in a vector:
+df <- txt %>% toupper %>% table
+df
+
 # 'as.data.frame' generates an R data.frame, which looks like a table in Excel:
 df <- txt %>% toupper %>% table %>% as.data.frame %>% magrittr::set_colnames(c("word", "count")) %>% dplyr::arrange(-count)
 df
-# nicer way to look at data frames:
+
+# A nicer way to look at data frames:
 View(df)
+
+# Generate a barplot:
 barplot(table(txt.lo), horiz=TRUE, las=1)
+
+# Most people these days use the ggplot2 package to generate plots in R
+# Just an example - ggplot2 requires an advanced workshop...
+library(ggplot2, lib.loc=lib.loc)
+ggplot(data=head(df, 10), aes(x=word, y=count)) +
+  geom_bar(stat="identity", color="black", fill="lightgreen") +
+  coord_flip() +
+  labs(
+    title="Frequency of some words: GREEN EGGS AND HAM",
+    subtitle="by Dr Seuss")
 
 #-------------------------------------------------------------------------------
 # Plotting a word cloud:
 #-------------------------------------------------------------------------------
-if (!require(devtools)) install.packages("devtools")
-if (!require(wordcloud2)) install_github("lchiffon/wordcloud2")
 wordcloud2(data = df)
 wordcloud2(df, minRotation = -pi/6, maxRotation = -pi/6, minSize = 10, rotateRatio = 1)
 
 #-------------------------------------------------------------------------------
-# Save wordcloud as PDF (not part of workshop) (added 2017-11-02):
+# Save wordcloud as PDF:
 #-------------------------------------------------------------------------------
 # save it in html
-library("htmlwidgets")
+library("htmlwidgets", lib=lib.loc)
 my_cloud <- wordcloud2(data = df)
 my_cloud
 htmlwidgets::saveWidget(my_cloud,"tmp.html",selfcontained = F)
 
-# and in pdf
-# install.packages("webshot")
-library(webshot)
-# webshot::install_phantomjs()
-webshot::webshot("tmp.html","green_eggs.pdf", delay =5, vwidth = 480, vheight=480)
 
 #-------------------------------------------------------------------------------
 # ********************************  EXERCISE!!  ********************************
