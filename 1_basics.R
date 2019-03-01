@@ -10,6 +10,10 @@
 # * Getting help
 #===============================================================================
 
+#-------------------------------------------------------------------------------
+# General parameters / settings for a script should go at the top:
+#-------------------------------------------------------------------------------
+options(stringsAsFactors = FALSE)
 
 #-------------------------------------------------------------------------------
 # Data formats: scalars and vectors
@@ -28,15 +32,25 @@ month.name
 # Vectors can be generated using the c() function:
 c(14, 6, 2016)
 
+#-------------------------------------------------------------------------------
+# Variables
+#-------------------------------------------------------------------------------
 # Usually data are stored in named VARIABLES
 # * Variables can be long
 # * Variables CANNOT contain spaces
 # * Variables CANNOT start with a number (but numbers can appear elsewhere in the name)
-v1 <- c(14, 6, 2016)
+
+# Two scalars:
+my.first.variable <- "Hello world!"
+my.second.variable <- 2019
 
 # Use 'print()' or 'cat()' command to display the contents of a variable:
 # Output from 'print()' is preceded by row numbers in square brackets:
-print(v1)
+print(my.first.variable)
+print(my.second.variable)
+
+# A vector:
+v1 <- c(14, 6, 2016)
 
 # Just the variable is equivalent to 'print()'
 v1
@@ -44,7 +58,7 @@ v1
 # Output from 'cat()' has no row numbers:
 cat(v1)
 
-# The 'View()' function opens a new tab and mostly used to inspect large tables:
+# The 'View()' function opens a new tab - mostly used to inspect large tables:
 View(v1)
 
 # A vector containing text:
@@ -59,7 +73,12 @@ paste(v2, collapse=" ")
 v3 <- 1:12
 print(v3)
 
+# There seq command can generate more complicated number vectors:
+seq(from=1, to=22, by=3)
+seq(from=1, to=10, length.out=19)
+
 # Vector items can have names:
+print(v3)
 names(v3) <- month.abb
 print(v3)
 names(v3)
@@ -74,13 +93,17 @@ LETTERS[10]
 LETTERS[c(8,5,12,12,15)]
 
 # You can also refer to vector items by name, if defined ...
+v3
 v3["Nov"]
 # Using a vector of names:
 v3[c("Jan", "Mar")]
-# ... or using bolean/logical values (TRUE/FALSE):
-v4 <- 1:3
+# ... or using boolean/logical values (TRUE/FALSE):
+(v4 <- 1:3)
 v4[c(TRUE, FALSE, TRUE)]
 
+#-------------------------------------------------------------------------------
+# Boolean/logical data
+#-------------------------------------------------------------------------------
 # Boolean/logical values are often generated through 'equal' or
 # 'greather/lesser than' (<==>) operations:
 10 > 2
@@ -99,14 +122,19 @@ typeof(1.2)
 
 
 #-------------------------------------------------------------------------------
-# Matrices are 2-dimensional arrays/tables where each item has to be of the
-# same data type:
+# Matrices are 2-dimensional arrays/tables where each item (cell) has to be of
+# the same data type:
 #-------------------------------------------------------------------------------
 mx1 <- matrix(1:24, ncol=6)
-print(mx1)
+mx1
 
-mx2 <- matrix(LETTERS[1:24], nrow=6)
-print(mx2)
+# Fill by column:
+mx2 <- matrix(LETTERS[1:24], nrow=6, byrow=FALSE)
+mx2
+
+# Fill by row:
+mx3 <- matrix(LETTERS[1:24], nrow=6, byrow=TRUE)
+mx3
 
 #-------------------------------------------------------------------------------
 # One of the great things about vectors and matrices in R is that they can be
@@ -125,29 +153,56 @@ mx1 + 1000
 df1 <- data.frame(Name=c("Jane", "Jack", "Jaim"),
                   Age=c(5, 12, 30),
                   Female=c(TRUE, FALSE, FALSE))
+
+#-------------------------------------------------------------------------------
+# Subsetting data frames
+#-------------------------------------------------------------------------------
+# Similar to vectors, extract data from data frames using square brackets;
+# rows and columns are separated by a comma:
 print(df1)
+df1[1,1]
+df1[3,2]
 
-#-------------------------------------------------------------------------------
-# Working directory
-#-------------------------------------------------------------------------------
-# ** In RStudio you can set the working using the 'Session' menu >
-#    'Set working directory'.
+# Leaving the space before the comma blank will return entire columns (all rows):
+df1[,1]
 
-# ** The best way of setting the correct working directory is to work with
-#    RStudio 'projects' (which is what we are doing for this workshop!):
-#    RStudio autmatically sets the working directory to the folder that contains
-#    the project file.
-#    Info: https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects
+# Accordingly, leaving the space AFTER the comma blank will return entire rows:
+df1[1,]
 
-# ** Usually you set the working directory programmatically using the setwd()
-#    function (the example code will not work on your screen):
-setwd("~/Dropbox/SGUL_Teaching/SGUL_Workshops/2017_Programming_Workshop")
+# Here again, extract several rows/columns using number vectors:
+df1[c(2,3), c(1,3)]
 
-# You can get the current working directory using the getwd() function:
-getwd()
+# ... or boolean values:
+df1[c(FALSE, TRUE, TRUE), c(TRUE, FALSE, TRUE)]
 
-# Use list.files() to see the contents of the current working directory:
-list.files()
+# For data frames the 'names()' command refers to column headers:
+names(df1)
+names(df1) <- c("Nom", "Age", "Femelle")
+df1
+
+# We often use the dollar sign to refer to entire column of a data frame
+# (returns a vector):
+df1$Nom
+class(df1$Nom)
+
+# Data frames can have row names as well:
+row.names(df1) <- paste0("Row", seq_len(nrow(df1)))
+df1
+
+# And similar to vectors, we can use row names and column names to subset
+# data frames:
+# (NOTE that text always to be defined with quotation marks)
+df1[,c("Nom", "Femelle")]
+df1[c("Row1", "Row3"),c("Nom", "Femelle")]
+
+# Sometimes code becomes easier to read if indices vectors are first stored
+# in a variable; then use the variable to subset the data frame:
+a <- c(2,3)
+b <- c(TRUE, FALSE, TRUE)
+c <- c("Nom", "Age")
+
+df1[a, b]
+df1[b, c]
 
 #-------------------------------------------------------------------------------
 # Packages
