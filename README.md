@@ -1,5 +1,8 @@
 # r_workshop_2019_03_01
 Axel Nohturfft  
+St. George's University of London  
+1-March-2019  
+1.30pm. H5.1  
 
 To create a copy of this repository in RStudio follow these steps:  
 
