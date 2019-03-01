@@ -1,0 +1,159 @@
+---
+title: "Filtering exome sequence data using an R script"
+author: "Axel Nohturfft"
+date: "`r Sys.Date()`"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 3
+    code_folding: "hide"
+    number_sections: FALSE
+    theme: "sandstone"
+    highlight: "tango"
+    fig_caption: TRUE
+---
+
+<style>
+h2 {background: brown;color: white;padding-left: 7px;}
+h3 {color: brown;}
+</style>
+
+# Parameters + packages  
+```{r}
+library(magrittr)
+library(dplyr)
+```
+
+
+# Input data  
+```{r define data file}
+# This code assumes that the data file is in the working directory.
+# Use setwd() to change the working directory or use the complete path to the data file below.
+data.file <- "M003_annovar_hg19_multianno_crop.txt"
+# Stop the script if the data file cannot be found in the current working directory:
+stopifnot(file.exists(data.file))
+```
+
+```{r read data}
+# only 141 headers, but
+m003 <- read.table(file=data.file, sep="\t", header=T, stringsAsFactors = FALSE)
+# m003 <- read.table(file=data.file, sep="\t", header=F, nrows=1)
+```
+
+
+```{r}
+# sum(m003$gnomAD_exome_ALL == ".", na.rm=T) # 3
+m003$gnomAD_exome_ALL[m003$gnomAD_exome_ALL == "."] <- NA
+m003$gnomAD_exome_ALL <- as.numeric(m003$gnomAD_exome_ALL)
+```
+
+
+```{r}
+names(m003)
+```
+
+```{r}
+dim(m003)
+```
+
+```{r}
+cat("Number of data columns:", ncol(m003))
+```
+
+```{r}
+cat("Number of data rows:", nrow(m003))
+```
+
+
+```{r}
+# 1000g2015aug_all,gnomAD_exome_ALL
+"1000g2015aug_all" %in% names(m003) # FALSE
+"gnomAD_exome_ALL" %in% names(m003) # TRUE
+grep("1000g2015aug_all", names(m003), ignore.case=T, value=T) # "X1000g2015aug_all"
+```
+
+```{r}
+class(m003$X1000g2015aug_all) # "numeric"
+range(m003$X1000g2015aug_all, na.rm=T) # 0.000199681 1.000000000
+```
+
+```{r}
+any(m003$X1000g2015aug_all == m003$gnomAD_exome_ALL) # TRUE
+sum(m003$X1000g2015aug_all == m003$gnomAD_exome_ALL, na.rm=T) # 248
+```
+
+```{r}
+m003 %>% 
+  filter(X1000g2015aug_all < 0.01) %>% 
+  nrow
+# 842
+```
+
+```{r}
+m003 %>% 
+  filter(gnomAD_exome_ALL < 0.01) %>% 
+  nrow
+# 1418
+```
+
+
+```{r}
+m003 %>% 
+  filter(gnomAD_exome_ALL < 0.01 | is.na(gnomAD_exome_ALL)) %>% 
+  nrow # 1929
+```
+
+```{r}
+# unique(m003$ExonicFunc.refGene)
+#  [1] NA                        "synonymous SNV"          "nonsynonymous SNV"       "nonframeshift insertion" "nonframeshift deletion" 
+#  [6] "unknown"                 "stopgain"                "frameshift deletion"     "frameshift insertion"    "stoploss"  
+```
+
+
+```{r}
+m003 %>% 
+  filter(gnomAD_exome_ALL < 0.01 | is.na(gnomAD_exome_ALL)) %>% 
+  filter(! ExonicFunc.refGene %in% c(NA, "synonymous SNV", "unknown")) %>% 
+  nrow # 645
+```
+
+```{r}
+m003 %>% 
+  filter(gnomAD_exome_ALL < 0.01 | is.na(gnomAD_exome_ALL)) %>% 
+  filter(! ExonicFunc.refGene %in% c(NA, "synonymous SNV", "unknown", "nonframeshift insertion", "nonframeshift deletion" )) %>% 
+  nrow # 615
+```
+
+```{r}
+head(m003$Gene.refGene)
+tail(m003$Gene.refGene)
+nrow(m003) # 34194
+length(grep(";", m003$Gene.refGene)) # 1102
+```
+
+```{r}
+interesting.variants <- m003 %>% 
+  filter(gnomAD_exome_ALL < 0.01 | is.na(gnomAD_exome_ALL)) %>% 
+  filter(! ExonicFunc.refGene %in% c(NA, "synonymous SNV", "unknown", "nonframeshift insertion", "nonframeshift deletion" )) %>% 
+  .$Gene.refGene %>% 
+  as.character %>%
+  unique
+# 361
+```
+
+```{r}
+print(interesting.variants)
+```
+
+
+```{r}
+sapply(m003, function(x) {
+any(grepl("homo", as.character(x)))
+}) %>% which
+```
+
+```{r}
+unique(as.character(m003$CLNDBN)) %>% head
+```
+
